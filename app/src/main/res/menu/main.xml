@@ -1,0 +1,34 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".MainActivity" >
+
+    <item android:id="@+id/action_settings"
+        android:title="@string/action_sync"
+        android:icon="@android:drawable/ic_popup_sync"
+        android:orderInCategory="100"
+        android:showAsAction="always" />
+
+    <item android:id="@+id/action_map_type_normal"
+        android:title="@string/action_map_type_normal"
+        android:icon="@android:drawable/ic_dialog_map"
+        android:orderInCategory="100"
+        android:showAsAction="withText" />
+
+    <item android:id="@+id/action_map_type_satellite"
+        android:title="@string/action_map_type_satellite"
+        android:icon="@android:drawable/ic_dialog_map"
+        android:orderInCategory="100"
+        android:showAsAction="withText" />
+
+    <item android:id="@+id/action_map_type_hybrid"
+        android:title="@string/action_map_type_hybrid"
+        android:icon="@android:drawable/ic_dialog_map"
+        android:orderInCategory="100"
+        android:showAsAction="withText" />
+
+    <item android:id="@+id/action_map_type_terrain"
+        android:title="@string/action_map_type_terrain"
+        android:icon="@android:drawable/ic_dialog_map"
+        android:orderInCategory="100"
+        android:showAsAction="withText" />
+</menu>

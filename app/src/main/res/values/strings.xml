@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Go! GPS</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_sync">Sincronizar</string>
+    <string name="falha_local">Falha ao receber localização</string>
+    <string name="no_internet">Sem conexão com a internet!</string>
+    <string name="sync">Sincronizando</string>
+
+
+    <string name="action_map_type_normal">Normal</string>
+    <string name="action_map_type_satellite">Satélite</string>
+    <string name="action_map_type_hybrid">Hibrído</string>
+    <string name="action_map_type_terrain">Terreno</string>
+</resources>
