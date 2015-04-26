@@ -1,189 +1,206 @@
 package br.com.sd.go;
 
-import android.app.Activity;
-import android.app.ProgressDialog;
-import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.os.AsyncTask;
-import android.os.Bundle;
-import android.util.Log;
-import android.widget.EditText;
-
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.os.Build;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.Toast;
+import android.widget.AdapterView;
+import android.widget.ListView;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.ArrayList;
+import java.util.List;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import br.com.sd.go.adapters.DrawerListAdapter;
+import br.com.sd.go.fragments.ListCarsFragment;
+import br.com.sd.go.fragments.MapFragment;
+import br.com.sd.go.fragments.TermsFragment;
+import br.com.sd.go.models.ItemMenuDrawer;
 
-public class MainActivity extends Activity implements View.OnClickListener {
+public class MainActivity extends ActionBarActivity implements ListView.OnItemClickListener {
 
-    EditText    usuario;
-    EditText    senha;
-    Button      btEntrar;
+    private ActionBar actionBar;
+    private DrawerLayout drawerLayout;
+    private ListView listView;
+    private ActionBarDrawerToggle barTg;
 
-    private ProgressDialog progressDialog;
+    private CharSequence titleDrawer;
+    private CharSequence titleFragment;
+
+    public final static int TERMS_MENU_POSITION = 3;
+
+    private List<ItemMenuDrawer> mItemsDrawer = new ArrayList<ItemMenuDrawer>() {{
+        add(new ItemMenuDrawer("Rastreamento", R.drawable.ic_device_gps_fixed));
+        add(new ItemMenuDrawer("Meus Veículos", R.drawable.ic_my_cars));
+        add(new ItemMenuDrawer("Termos de uso", R.drawable.ic_action_terms_of_use));
+        add(new ItemMenuDrawer("Sair", null));
+    }};
+
+    private int mActualPosition = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.drawer_layout);
 
-        usuario = (EditText) findViewById(R.id.etUsuario);
-        senha = (EditText) findViewById(R.id.etSenha);
-        btEntrar = (Button) findViewById(R.id.btEntrar);
+        titleDrawer = titleFragment = getTitle();
 
-        btEntrar.setOnClickListener(this);
-    }
+        actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setHomeButtonEnabled(true);
 
-    public void onClick(View view) {
+        DrawerListAdapter drawerAdapter = new DrawerListAdapter(this, mItemsDrawer);
 
-        if( validaDados() ){
-            if(isConnected()){
-                new HttpAsyncTask(this).execute("http://gogps.com.br/login/"+usuario.getText()+"/"+senha.getText());
-            } else {
-                Toast.makeText(this, R.string.no_internet, Toast.LENGTH_SHORT).show();
+        listView = (ListView) findViewById(R.id.lv_navigator);
+        listView.setOnItemClickListener(this);
+
+        View header = LayoutInflater.from(this).inflate(R.layout.header_menu,
+                listView, false);
+        listView.addHeaderView(header, null, false);
+
+        listView.setAdapter(drawerAdapter);
+
+        drawerLayout = (DrawerLayout) findViewById(R.id.dl);
+
+        barTg = new ActionBarDrawerToggle(this, drawerLayout,
+                R.drawable.toggle_img, R.drawable.toggle_img) {
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+                actionBar.setTitle(titleFragment);
+                supportInvalidateOptionsMenu();
+                syncState();
             }
-        } else {
-            Toast.makeText(getBaseContext(), "Por favor, preencha os campos obrigatórios.", Toast.LENGTH_SHORT).show();
-        }
 
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                actionBar.setTitle(titleDrawer);
+                supportInvalidateOptionsMenu();
+                syncState();
+            }
+        };
+
+        drawerLayout.setDrawerListener(barTg);
+        barTg.syncState();
+
+        if (savedInstanceState == null) {
+            selectedItem(1);
+        }
     }
 
-    private boolean validaDados() {
-        if(usuario.getText().toString().isEmpty() && usuario.getText().toString().equals("")) {
-            return false;
-        }
-
-        if(senha.getText().toString().isEmpty() && senha.getText().toString().equals("")) {
-            return false;
-        }
-
-        return true;
-    }
-
-
-    public static String GET(String url){
-        InputStream inputStream = null;
-        String result = "";
-        try {
-            // create HttpClient
-            HttpClient httpclient = new DefaultHttpClient();
-
-            // make GET request to the given URL
-            HttpResponse httpResponse = httpclient.execute(new HttpGet(url));
-
-            // receive response as inputStream
-            inputStream = httpResponse.getEntity().getContent();
-
-            // convert inputstream to string
-            if(inputStream != null)
-                result = convertInputStreamToString(inputStream);
-            else
-                result = "Did not work!";
-
-        } catch (Exception e) {
-            Log.d("InputStream", e.getLocalizedMessage());
-        }
-
-        return result;
-    }
-
-    private static String convertInputStreamToString(InputStream inputStream) throws IOException {
-        BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(inputStream));
-        String line = "";
-        String result = "";
-        while((line = bufferedReader.readLine()) != null)
-            result += line;
-
-        inputStream.close();
-        return result;
-
-    }
-
-    public boolean isConnected(){
-        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Activity.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-        if (networkInfo != null && networkInfo.isConnected())
-            return true;
-        else
-            return false;
-    }
-    private class HttpAsyncTask extends AsyncTask<String, Void, String> {
-        Context context;
-
-        public HttpAsyncTask(Context context) {
-            this.context = context;
-        }
-        @Override
-        protected String doInBackground(String... urls) {
-
-            return GET(urls[0]);
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            showProgressDialog();
-        }
-
-        // onPostExecute displays the results of the AsyncTask.
-        @Override
-        protected void onPostExecute(String result) {
-
-            try {
-                Integer id = Integer.parseInt(result);
-
-                if(id != 0) {
-                    Intent it = new Intent(getBaseContext(), MapActivity.class);
-                    it.putExtra("id", id);
-                    startActivity(it);
-
-                    finish();
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home: {
+                if (drawerLayout.isDrawerOpen(listView)) {
+                    drawerLayout.closeDrawer(listView);
                 } else {
-                    Toast.makeText(getBaseContext(), "Usuário e senha incorretos", Toast.LENGTH_LONG).show();
+                    drawerLayout.openDrawer(listView);
                 }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                Toast.makeText(getBaseContext(), "Usuário e senha incorretos", Toast.LENGTH_LONG).show();
-            } finally {
-                hideProgressDialog();
+                return true;
             }
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 
-
-    public void showProgressDialog() {
-        try {
-            progressDialog = ProgressDialog.show(this, "Aguarde...", this.getString(R.string.sync));
-        } catch (Throwable e) {
-            Log.e("ERROR", e.getMessage(), e);
-        }
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        barTg.syncState();
     }
 
-    public void hideProgressDialog() {
-        try {
-
-            if(progressDialog != null) {
-                progressDialog.dismiss();
-            }
-
-        } catch (Throwable e) {
-            Log.e("ERROR", e.getMessage(), e);
-        }
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        barTg.onConfigurationChanged(newConfig);
     }
 
+    public void openTermsFragment() {
+        selectedItem(TERMS_MENU_POSITION);
+    }
+
+    private void selectedItem(int position) {
+        --position; // Por conta do header que foi adicionado e conta como uma posição.
+
+        if (position == mActualPosition) {
+            drawerLayout.closeDrawer(listView);
+            return;
+        }
+
+        FragmentTransaction ft;
+        Fragment frag = null;
+
+        switch (position) {
+            case 0:
+                frag = new MapFragment();
+                break;
+            case 1:
+                frag = new ListCarsFragment();
+                break;
+            case 2:
+                frag = new TermsFragment();
+                break;
+            case 3:
+                GoGPS.setBasicAuth(null);
+                startActivity(new Intent(getBaseContext(), LoginActivity.class));
+                finish();
+                break;
+            default:
+                break;
+        }
+
+        if (frag != null) {
+            ft = getSupportFragmentManager().beginTransaction();
+            ft.replace(R.id.frame_layout, frag);
+            ft.commit();
+        }
+
+        listView.setItemChecked(position, true);
+        setCustomTitle(mItemsDrawer.get(position).getTitle());
+        drawerLayout.closeDrawer(listView);
+
+        mActualPosition = position;
+    }
+
+    private void setCustomTitle(String title) {
+        actionBar.setTitle(title);
+        titleFragment = title;
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        selectedItem(position);
+    }
+
+    public boolean drawerIsOpen() {
+        return drawerLayout.isDrawerOpen(listView);
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_MENU && "LGE".equalsIgnoreCase(Build.BRAND)) {
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_MENU && "LGE".equalsIgnoreCase(Build.BRAND)) {
+            openOptionsMenu();
+            return true;
+        }
+        return super.onKeyUp(keyCode, event);
+    }
 }

@@ -1,16 +1,17 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    android:layout_gravity="center">
 
     <LinearLayout
         android:orientation="vertical"
         android:gravity="center"
-        android:layout_centerHorizontal="true"
         android:layout_width="300dp"
         android:layout_marginTop="30dp"
         android:layout_height="wrap_content"
+        android:layout_gravity="center|top"
         android:id="@+id/linearLayout">
 
         <ImageView
@@ -18,7 +19,8 @@
             android:layout_height="200dp"
             android:layout_marginBottom="30dp"
             android:id="@+id/logo"
-            android:src="@drawable/logo"/>
+            android:src="@drawable/logo"
+            android:contentDescription="@string/app_name" />
 
         <TextView
             android:layout_width="fill_parent"
@@ -60,4 +62,4 @@
 
         </LinearLayout>
     </LinearLayout>
-</RelativeLayout>
+</ScrollView>
