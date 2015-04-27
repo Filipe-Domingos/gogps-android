@@ -68,7 +68,19 @@ public class ListCarsFragment extends ListFragment {
         mProgressDialog = ProgressDialog.show(getActivity(), "Aguarde", "Realizando bloqueio...");
         int command = CommandAPIRequest.BLOCK_COMMAND;
 
-        CommandAPIRequest request = new CommandAPIRequest(deviceId, command,
+        JSONObject object = new JSONObject();
+
+        try {
+            object.put("device_id", deviceId);
+            object.put("cod_command", command);
+        } catch (JSONException e) {
+            String message = "Ocorreu um erro ao enviar a solicitação.";
+            Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+            Log.e(TAG, message, e);
+            return;
+        }
+
+        CommandAPIRequest request = new CommandAPIRequest(object,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {

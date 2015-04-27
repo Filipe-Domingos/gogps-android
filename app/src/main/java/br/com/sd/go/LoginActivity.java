@@ -2,6 +2,7 @@ package br.com.sd.go;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -13,19 +14,28 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 
-import br.com.sd.go.requests.LoginRequest;
-import br.com.sd.go.utils.NetworkUtils;
+import java.io.IOException;
+import java.util.ArrayList;
 
 public class LoginActivity extends ActionBarActivity implements View.OnClickListener {
+
+    private static final String TAG = LoginActivity.class.getSimpleName();
 
     EditText mEmail;
     EditText mPassword;
     Button mBtnLogin;
 
     private ProgressDialog mProgressDialog;
+
+    private Boolean mProcessingLogin = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,36 +58,73 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
     }
 
     public void onClick(View view) {
-        if (validaDados()) {
+        if (validaDados() && !mProcessingLogin) {
+            String email = mEmail.getText().toString();
+            String password = mPassword.getText().toString();
+
+            new LoginAsyncTask(email, password).execute();
+        }
+    }
+
+    private class LoginAsyncTask extends AsyncTask<Void, Void, Boolean> {
+
+        private static final String sUrl = "http://gogps.com.br/gogps-rest/api/user/login";
+        String mUser, mPassword;
+
+        public LoginAsyncTask(String email, String password) {
+            mUser = email;
+            mPassword = password;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            ArrayList<NameValuePair> postParameters;
+            postParameters = new ArrayList<>();
+            postParameters.add(new BasicNameValuePair("login", mUser));
+            postParameters.add(new BasicNameValuePair("password", mPassword));
+
+            HttpClient httpclient = new DefaultHttpClient();
+            HttpPost httpPost = new HttpPost(sUrl);
+
+            HttpResponse httpResponse;
+
+            try {
+                String base64 = Base64.encodeToString((mUser + ":" + mPassword).getBytes(),
+                        Base64.NO_WRAP);
+                httpPost.addHeader("Authorization", "Basic " + base64);
+                httpPost.setEntity(new UrlEncodedFormEntity(postParameters));
+                httpResponse = httpclient.execute(httpPost);
+            } catch (IOException e) {
+                Log.e(TAG, "Error on request login", e);
+                return false;
+            }
+
+            int responseCode = httpResponse.getStatusLine().getStatusCode();
+
+            return responseCode == 200;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
             showProgressDialog();
+            mProcessingLogin = true;
+        }
 
-            final String email = mEmail.getText().toString();
-            final String password = mPassword.getText().toString();
-
-            LoginRequest request = new LoginRequest(email, password,
-                    new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            String formatted = email + ":" + password;
-                            byte[] encoded = Base64.encode(formatted.getBytes(), Base64.DEFAULT);
-                            GoGPS.setBasicAuth(new String(encoded));
-                            hideProgressDialog();
-                            startActivity(new Intent(getBaseContext(), MainActivity.class));
-                            finish();
-                        }
-                    },
-
-                    new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            hideProgressDialog();
-                            Toast.makeText(LoginActivity.this, "Verifique seus dados.",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    }
-            );
-
-            NetworkUtils.addToRequestQueue(request);
+        @Override
+        protected void onPostExecute(Boolean success) {
+            hideProgressDialog();
+            if (success) {
+                String formatted = mUser + ":" + mPassword;
+                byte[] encoded = Base64.encode(formatted.getBytes(), Base64.DEFAULT);
+                GoGPS.setBasicAuth(new String(encoded));
+                startActivity(new Intent(getBaseContext(), MainActivity.class));
+                finish();
+            } else {
+                Toast.makeText(LoginActivity.this, "Verifique seus dados.",
+                        Toast.LENGTH_SHORT).show();
+            }
+            mProcessingLogin = false;
         }
     }
 

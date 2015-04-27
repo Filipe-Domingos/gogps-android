@@ -18,14 +18,9 @@ public class CommandAPIRequest extends JsonObjectRequest {
     public static final int BLOCK_COMMAND = 1;
     public static final int UNLOCK_COMMAND = 2;
 
-    private Long mDeviceId;
-    private int mCommand;
-
-    public CommandAPIRequest(Long deviceId, int command, Response.Listener<JSONObject> listener,
+    public CommandAPIRequest(JSONObject object, Response.Listener<JSONObject> listener,
                              Response.ErrorListener errorListener) {
-        super(Method.POST, sUrl, listener, errorListener);
-        mDeviceId = deviceId;
-        mCommand = command;
+        super(Method.POST, sUrl, object, listener, errorListener);
     }
 
     @Override
@@ -41,13 +36,5 @@ public class CommandAPIRequest extends JsonObjectRequest {
 
         params.putAll(super.getHeaders());
         return params;
-    }
-
-    @Override
-    public Map<String, String> getParams() throws AuthFailureError {
-        Map<String, String> pars = new HashMap<>();
-        pars.put("device_id", mDeviceId + "");
-        pars.put("command", mCommand + "");
-        return pars;
     }
 }
