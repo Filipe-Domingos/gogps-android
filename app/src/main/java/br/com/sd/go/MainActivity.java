@@ -42,7 +42,7 @@ public class MainActivity extends ActionBarActivity implements ListView.OnItemCl
         add(new ItemMenuDrawer("Rastreamento", R.drawable.ic_device_gps_fixed));
         add(new ItemMenuDrawer("Meus Veículos", R.drawable.ic_my_cars));
         add(new ItemMenuDrawer("Termos de uso", R.drawable.ic_action_terms_of_use));
-        add(new ItemMenuDrawer("Sair", null));
+        add(new ItemMenuDrawer("Sair", R.drawable.ic_action_exit));
     }};
 
     private int mActualPosition = -1;

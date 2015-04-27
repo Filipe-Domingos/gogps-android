@@ -49,7 +49,7 @@ public class ListCarsFragment extends ListFragment {
                 .setTitle("Bloquear veículo")
                 .setMessage("Deseja realmente bloquear o veículo?\n" +
                         "Leia os termos antes de continuar essa ação.")
-                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setIcon(R.drawable.ic_action_alert_warning)
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         blockVehicle(mItems.get(position).getId());
