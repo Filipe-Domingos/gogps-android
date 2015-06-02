@@ -1,54 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F5F5F5"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:padding="12dp">
 
-    <TextView
-        android:id="@+id/tvTitle"
-        android:layout_width="0dp"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="NOME DO CARRO"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="#333"
-        android:textSize="16sp"
-        android:padding="12dp"/>
-
-    <LinearLayout
-        android:id="@+id/cortar"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:background="#c9302c"
-        android:minWidth="10dp"
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp"
-        android:layout_marginRight="1dp">
+        android:orientation="horizontal">
 
         <TextView
-            android:layout_gravity="center"
-            android:layout_width="wrap_content"
+            android:id="@+id/tvPlaca"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Cortar"
-            android:textColor="#fff"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/restaurar"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:background="#286090"
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp"
-        android:minWidth="10dp">
+            android:layout_weight="1"
+            android:text="HXI-4677"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="#333"
+            android:textSize="16sp"/>
 
         <TextView
-            android:layout_gravity="center"
+            android:id="@+id/tvVelocidade"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Restaurar"
-            android:textColor="#fff"/>
+            android:text="50 Km/h"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="#333"
+            android:textSize="16sp"
+            android:layout_marginRight="40dp"/>
+
+        <TextView
+            android:id="@+id/tvDistancia"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="10m"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="#333"
+            android:visibility="gone"
+            android:textSize="16sp" />
+
     </LinearLayout>
 
 </LinearLayout>

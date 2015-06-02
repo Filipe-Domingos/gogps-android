@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -32,6 +33,7 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
     EditText mEmail;
     EditText mPassword;
     Button mBtnLogin;
+    CheckBox mRemember;
 
     private ProgressDialog mProgressDialog;
 
@@ -52,6 +54,7 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
             mEmail = (EditText) findViewById(R.id.etUsuario);
             mPassword = (EditText) findViewById(R.id.etSenha);
             mBtnLogin = (Button) findViewById(R.id.btEntrar);
+            mRemember = (CheckBox) findViewById(R.id.cb_remember);
 
             mBtnLogin.setOnClickListener(this);
         }
@@ -118,6 +121,7 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
                 String formatted = mUser + ":" + mPassword;
                 byte[] encoded = Base64.encode(formatted.getBytes(), Base64.DEFAULT);
                 GoGPS.setBasicAuth(new String(encoded));
+                GoGPS.setRemember(mRemember.isChecked());
                 startActivity(new Intent(getBaseContext(), MainActivity.class));
                 finish();
             } else {

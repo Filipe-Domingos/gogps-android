@@ -13,7 +13,8 @@ import br.com.sd.go.GoGPS;
 
 public class DevicesUserRequest extends JsonArrayRequest {
 
-    private static final String sUrl = "http://gogps.com.br/gogps-rest/api/device/getDeviceUser";
+//    private static final String sUrl = "http://gogps.com.br/gogps-rest/api/device/getDeviceUser";
+    private static final String sUrl = "http://gogps.com.br/gogps-rest/api/device/getLastInfDevice";
 
     public DevicesUserRequest(Response.Listener<JSONArray> listener,
                               Response.ErrorListener errorListener) {

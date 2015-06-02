@@ -21,10 +21,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import br.com.sd.go.adapters.DrawerListAdapter;
+import br.com.sd.go.adapters.ListCarsAdapter;
+import br.com.sd.go.fragments.GGMapFragment;
 import br.com.sd.go.fragments.ListCarsFragment;
-import br.com.sd.go.fragments.MapFragment;
 import br.com.sd.go.fragments.TermsFragment;
 import br.com.sd.go.models.ItemMenuDrawer;
+import br.com.sd.go.models.VehicleItem;
 
 public class MainActivity extends ActionBarActivity implements ListView.OnItemClickListener {
 
@@ -36,11 +38,13 @@ public class MainActivity extends ActionBarActivity implements ListView.OnItemCl
     private CharSequence titleDrawer;
     private CharSequence titleFragment;
 
+    public final static int CARS_POSITION = 1;
+    public final static int MAP_POSITION = 2;
     public final static int TERMS_MENU_POSITION = 3;
 
     private List<ItemMenuDrawer> mItemsDrawer = new ArrayList<ItemMenuDrawer>() {{
-        add(new ItemMenuDrawer("Rastreamento", R.drawable.ic_device_gps_fixed));
         add(new ItemMenuDrawer("Meus Veículos", R.drawable.ic_my_cars));
+        add(new ItemMenuDrawer("Rastreamento", R.drawable.ic_device_gps_fixed));
         add(new ItemMenuDrawer("Termos de uso", R.drawable.ic_action_terms_of_use));
         add(new ItemMenuDrawer("Sair", R.drawable.ic_action_exit));
     }};
@@ -126,11 +130,23 @@ public class MainActivity extends ActionBarActivity implements ListView.OnItemCl
         barTg.onConfigurationChanged(newConfig);
     }
 
+    public void showCarInMap(VehicleItem item) {
+        selectedItem(MAP_POSITION, item);
+    }
+
+    public void openMapFragment() {
+        selectedItem(MAP_POSITION);
+    }
+
+    public void openCarsFragment() {
+        selectedItem(CARS_POSITION);
+    }
+
     public void openTermsFragment() {
         selectedItem(TERMS_MENU_POSITION);
     }
 
-    private void selectedItem(int position) {
+    private void selectedItem(int position, VehicleItem item) {
         --position; // Por conta do header que foi adicionado e conta como uma posição.
 
         if (position == mActualPosition) {
@@ -143,10 +159,15 @@ public class MainActivity extends ActionBarActivity implements ListView.OnItemCl
 
         switch (position) {
             case 0:
-                frag = new MapFragment();
+                frag = new ListCarsFragment();
                 break;
             case 1:
-                frag = new ListCarsFragment();
+                frag = new GGMapFragment();
+                if (item != null) {
+                    Bundle args = new Bundle();
+                    args.putSerializable(GGMapFragment.ITEM_KEY, item);
+                    frag.setArguments(args);
+                }
                 break;
             case 2:
                 frag = new TermsFragment();
@@ -171,6 +192,10 @@ public class MainActivity extends ActionBarActivity implements ListView.OnItemCl
         drawerLayout.closeDrawer(listView);
 
         mActualPosition = position;
+    }
+
+    private void selectedItem(int position) {
+        selectedItem(position, null);
     }
 
     private void setCustomTitle(String title) {

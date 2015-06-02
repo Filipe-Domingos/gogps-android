@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="white">#FFFFFF</color>
+    <color name="footer_list_content">#DDDDDD</color>
+    <color name="footer_list_content_pressed">#EFEFEF</color>
+</resources>

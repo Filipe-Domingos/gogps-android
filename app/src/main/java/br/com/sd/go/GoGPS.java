@@ -11,6 +11,9 @@ import br.com.sd.go.utils.GoGPSConstants;
 
 public class GoGPS extends Application {
 
+    // Chave google maps mac siqueira - AIzaSyBnbQv3V1fgGbkbn5jRz8dXPT54PzZUCRY
+    // Chave google maps final - AIzaSyCgsVxVeTlDcgxHJV_LrpQymuwcoQk5Gqc
+
     static final private String TAG = GoGPS.class.getSimpleName();
 
     private static Context mContext;
@@ -26,6 +29,14 @@ public class GoGPS extends Application {
         Log.d(TAG, "Display: " + Build.DISPLAY);
     }
 
+    @Override
+    public void onTerminate() {
+        super.onTerminate();
+        if (!getRemember()) {
+            setBasicAuth(null);
+        }
+    }
+
     public static Context getContext() {
         return mContext;
     }
@@ -35,11 +46,24 @@ public class GoGPS extends Application {
         return prefs.getString(GoGPSConstants.PREFS_BASIC_AUTH, null);
     }
 
+    public static Boolean getRemember() {
+        SharedPreferences prefs = mContext.getSharedPreferences(GoGPSConstants.PREFS_FILE, 0);
+        return prefs.getBoolean(GoGPSConstants.PREFS_REMEMBER, false);
+    }
+
     @SuppressLint("CommitPrefEdits")
     public static void setBasicAuth(String basicAuth) {
         SharedPreferences prefs = mContext.getSharedPreferences(GoGPSConstants.PREFS_FILE, 0);
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString(GoGPSConstants.PREFS_BASIC_AUTH, basicAuth);
+        editor.commit();
+    }
+
+    @SuppressLint("CommitPrefEdits")
+    public static void setRemember(Boolean remember) {
+        SharedPreferences prefs = mContext.getSharedPreferences(GoGPSConstants.PREFS_FILE, 0);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean(GoGPSConstants.PREFS_REMEMBER, remember);
         editor.commit();
     }
 }
