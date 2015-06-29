@@ -1,17 +1,27 @@
 package br.com.sd.go.adapters;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.List;
 
 import br.com.sd.go.MainActivity;
 import br.com.sd.go.R;
 import br.com.sd.go.models.VehicleItem;
+import br.com.sd.go.utils.NetworkUtils;
 
 public class ListCarsAdapter extends ArrayAdapter<VehicleItem> {
 
@@ -32,7 +42,7 @@ public class ListCarsAdapter extends ArrayAdapter<VehicleItem> {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        ViewHolder viewHolder;
+        final ViewHolder viewHolder;
 
         if (convertView == null) {
             // inflate the GridView item layout
@@ -43,6 +53,7 @@ public class ListCarsAdapter extends ArrayAdapter<VehicleItem> {
             viewHolder = new ViewHolder();
             viewHolder.tvPlaca = (TextView) convertView.findViewById(R.id.tvPlaca);
             viewHolder.tvVelocidade = (TextView) convertView.findViewById(R.id.tvVelocidade);
+            viewHolder.tvAddress = (TextView) convertView.findViewById(R.id.tvAddress);
             convertView.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
@@ -58,11 +69,50 @@ public class ListCarsAdapter extends ArrayAdapter<VehicleItem> {
             viewHolder.tvVelocidade.setText(item.getSpeed() + " Km/h");
         }
 
+        viewHolder.tvAddress.setText("Carregando endereço...");
+
+        String latlong = item.getLatitude() + "," + item.getLongitude();
+        String url = "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + latlong;
+
+        JsonObjectRequest request = new JsonObjectRequest(url, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                String address = null;
+                if (response.has("results")) {
+                    try {
+                        JSONArray results = response.getJSONArray("results");
+                        if (results.length() > 1) {
+                            JSONObject result = results.getJSONObject(0);
+                            address = result.optString("formatted_address", "Endereço não encontrado.");
+                            address = address.replace(", Brazil", "");
+                            address = address.replace(", Brasil", "");
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                if (address == null) {
+                    viewHolder.tvAddress.setText("Endereço não encontrado.");
+                } else {
+                    viewHolder.tvAddress.setText(address);
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                viewHolder.tvAddress.setText("Endereço não encontrado.");
+                error.printStackTrace();
+            }
+        });
+
+        NetworkUtils.addToRequestQueue(request);
         return convertView;
     }
 
     private static class ViewHolder {
         TextView tvPlaca;
         TextView tvVelocidade;
+        TextView tvAddress;
     }
 }

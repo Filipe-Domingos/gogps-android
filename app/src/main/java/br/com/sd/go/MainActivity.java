@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
@@ -12,16 +13,17 @@ import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import br.com.sd.go.adapters.DrawerListAdapter;
-import br.com.sd.go.adapters.ListCarsAdapter;
 import br.com.sd.go.fragments.GGMapFragment;
 import br.com.sd.go.fragments.ListCarsFragment;
 import br.com.sd.go.fragments.TermsFragment;
@@ -41,6 +43,16 @@ public class MainActivity extends ActionBarActivity implements ListView.OnItemCl
     public final static int CARS_POSITION = 1;
     public final static int MAP_POSITION = 2;
     public final static int TERMS_MENU_POSITION = 3;
+
+    Handler updateTimeHandler = new Handler();
+    Runnable runnableUpdateTime = new Runnable() {
+        public void run() {
+            supportInvalidateOptionsMenu();
+            updateTimeHandler.postDelayed(this, 3000);
+        }
+    };
+
+    TextView timeViewBar;
 
     private List<ItemMenuDrawer> mItemsDrawer = new ArrayList<ItemMenuDrawer>() {{
         add(new ItemMenuDrawer("Meus Veículos", R.drawable.ic_my_cars));
@@ -100,6 +112,32 @@ public class MainActivity extends ActionBarActivity implements ListView.OnItemCl
         if (savedInstanceState == null) {
             selectedItem(1);
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        updateTimeHandler.removeCallbacks(runnableUpdateTime);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            String text = android.text.format.DateFormat.format("d/MM hh:mm  ",
+                    new java.util.Date()).toString();
+
+            timeViewBar = new TextView(this);
+            timeViewBar.setText(text);
+            timeViewBar.setTextColor(getResources().getColor(R.color.white));
+            timeViewBar.setOnClickListener(null);
+            timeViewBar.setPadding(5, 5, 5, 5);
+            timeViewBar.setTextSize(16);
+            menu.add(0, R.string.app_name, 1, R.string.app_name)
+                    .setActionView(timeViewBar)
+                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+            updateTimeHandler.postDelayed(runnableUpdateTime, 1000);
+        }
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override

@@ -172,6 +172,11 @@ public class ListCarsFragment extends Fragment {
 
                                 VehicleItem item = new VehicleItem(id, name);
 
+                                Double latitude = data.getDouble("latitude");
+                                Double longitude = data.getDouble("longitude");
+                                item.setLatitude(latitude);
+                                item.setLongitude(longitude);
+
                                 if (data.has("other")) {
                                     String extraInfo = data.getString("other");
                                     item.setExtraInfo(extraInfo);

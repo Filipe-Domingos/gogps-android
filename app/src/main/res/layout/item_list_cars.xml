@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F5F5F5"
-    android:orientation="horizontal"
+    android:orientation="vertical"
     android:padding="12dp">
 
     <LinearLayout
@@ -43,5 +43,15 @@
             android:textSize="16sp" />
 
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvAddress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Carregando endereço..."
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="#333"
+        android:textSize="13sp"
+        android:layout_marginTop="10dp"/>
 
 </LinearLayout>
