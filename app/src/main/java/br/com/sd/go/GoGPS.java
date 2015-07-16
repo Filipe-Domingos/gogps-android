@@ -29,14 +29,6 @@ public class GoGPS extends Application {
         Log.d(TAG, "Display: " + Build.DISPLAY);
     }
 
-    @Override
-    public void onTerminate() {
-        super.onTerminate();
-        if (!getRemember()) {
-            setBasicAuth(null);
-        }
-    }
-
     public static Context getContext() {
         return mContext;
     }

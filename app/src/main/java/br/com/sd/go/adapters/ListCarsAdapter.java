@@ -25,6 +25,8 @@ import br.com.sd.go.utils.NetworkUtils;
 
 public class ListCarsAdapter extends ArrayAdapter<VehicleItem> {
 
+    private static final String TAG = ListCarsAdapter.class.getSimpleName();
+
     public ListCarsAdapter(Context context, List<VehicleItem> objects) {
         super(context, R.layout.item_list_cars, objects);
     }
@@ -53,6 +55,7 @@ public class ListCarsAdapter extends ArrayAdapter<VehicleItem> {
             viewHolder = new ViewHolder();
             viewHolder.tvPlaca = (TextView) convertView.findViewById(R.id.tvPlaca);
             viewHolder.tvVelocidade = (TextView) convertView.findViewById(R.id.tvVelocidade);
+            viewHolder.tvDistancia = (TextView) convertView.findViewById(R.id.tvDistancia);
             viewHolder.tvAddress = (TextView) convertView.findViewById(R.id.tvAddress);
             convertView.setTag(viewHolder);
         } else {
@@ -65,7 +68,7 @@ public class ListCarsAdapter extends ArrayAdapter<VehicleItem> {
         if (item.getSpeed() == null) {
             viewHolder.tvVelocidade.setVisibility(View.GONE);
         } else {
-            viewHolder.tvVelocidade.setVisibility(View.GONE);
+            viewHolder.tvVelocidade.setVisibility(View.VISIBLE);
             viewHolder.tvVelocidade.setText(item.getSpeed() + " Km/h");
         }
 
@@ -88,7 +91,7 @@ public class ListCarsAdapter extends ArrayAdapter<VehicleItem> {
                             address = address.replace(", Brasil", "");
                         }
                     } catch (JSONException e) {
-                        e.printStackTrace();
+                        Log.e(TAG, "Erro ao ler endereço", e);
                     }
                 }
 
@@ -113,6 +116,7 @@ public class ListCarsAdapter extends ArrayAdapter<VehicleItem> {
     private static class ViewHolder {
         TextView tvPlaca;
         TextView tvVelocidade;
+        TextView tvDistancia;
         TextView tvAddress;
     }
 }

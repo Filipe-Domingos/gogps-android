@@ -29,11 +29,13 @@ import br.com.sd.go.MainActivity;
 import br.com.sd.go.R;
 import br.com.sd.go.adapters.ListCarsAdapter;
 import br.com.sd.go.models.VehicleItem;
+import br.com.sd.go.requests.CommandAPIRequest;
 import br.com.sd.go.requests.DevicesUserRequest;
 import br.com.sd.go.swipemenu.SwipeMenu;
 import br.com.sd.go.swipemenu.SwipeMenuCreator;
 import br.com.sd.go.swipemenu.SwipeMenuItem;
 import br.com.sd.go.swipemenu.SwipeMenuListView;
+import br.com.sd.go.utils.CommandRequests;
 import br.com.sd.go.utils.NetworkUtils;
 import br.com.sd.go.utils.QuickReturnUtil;
 
@@ -83,12 +85,12 @@ public class ListCarsFragment extends Fragment {
 
                 menu.addMenuItem(actualPositionItem);
 
-//                SwipeMenuItem routesItem = new SwipeMenuItem(getActivity());
-//                routesItem.setBackground(new ColorDrawable(Color.rgb(0xFD, 0xFD, 0xFD)));
-//                routesItem.setWidth(dp2px(60));
-//                routesItem.setIcon(R.drawable.ic_maps_map);
+                SwipeMenuItem routesItem = new SwipeMenuItem(getActivity());
+                routesItem.setBackground(new ColorDrawable(Color.rgb(0xFD, 0xFD, 0xFD)));
+                routesItem.setWidth(dp2px(60));
+                routesItem.setIcon(R.drawable.ic_maps_map);
 
-//                menu.addMenuItem(routesItem);
+                menu.addMenuItem(routesItem);
             }
 
         };
@@ -98,20 +100,28 @@ public class ListCarsFragment extends Fragment {
         mListView.setOnMenuItemClickListener(new SwipeMenuListView.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(int position, SwipeMenu menu, int index) {
+                VehicleItem item = mItems.get(position);
                 switch (index) {
                     case 0:
+                        Integer commandCode;
                         switch (menu.getViewType()) {
                             case 1:
                                 // Mandar bloquear
+                                commandCode = CommandAPIRequest.BLOCK_COMMAND;
                                 break;
                             default:
                                 // Mandar desbloquear
+                                commandCode = CommandAPIRequest.UNLOCK_COMMAND;
                                 break;
                         }
+                        MainActivity activity = (MainActivity) getActivity();
+                        new CommandRequests(activity, item.getId(), commandCode).sendCommand();
+                        break;
                     case 1:
-                        VehicleItem item = mItems.get(position);
                         ((MainActivity) getActivity()).showCarInMap(item);
                         break;
+                    case 2:
+                        ((MainActivity) getActivity()).showCarRoute(item);
                 }
                 return false;
             }

@@ -1,6 +1,12 @@
 package br.com.sd.go.fragments;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.InflateException;
@@ -22,17 +28,26 @@ import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Dictionary;
 
 import br.com.sd.go.MainActivity;
 import br.com.sd.go.R;
 import br.com.sd.go.models.VehicleItem;
 import br.com.sd.go.requests.LastInfDeviceRequest;
+import br.com.sd.go.requests.RouteByDeviceRequest;
 import br.com.sd.go.utils.NetworkUtils;
 import br.com.sd.go.utils.QuickReturnUtil;
 
@@ -44,6 +59,7 @@ public class GGMapFragment extends Fragment {
     private VehicleItem mItem;
 
     public static final String ITEM_KEY = "item";
+    public static final String SHOW_ROUTE_KEY = "show_route";
 
     private static final String TAG = GGMapFragment.class.getCanonicalName();
 
@@ -108,18 +124,168 @@ public class GGMapFragment extends Fragment {
                 BitmapDescriptorFactory.HUE_RED;
         BitmapDescriptor icon = BitmapDescriptorFactory.defaultMarker(color);
 
+        String snippet = item.getTime() + " - " + item.getSpeed() + " km/h";
+
         MarkerOptions markerOptions = new MarkerOptions()
                 .position(coordinate)
                 .title(item.getName())
-                .snippet(item.getTime())
+                .snippet(snippet)
                 .icon(icon);
 
         mMap.addMarker(markerOptions);
 
         if (isLast) {
-            int zoom = mItem == null ? 10 : 15;
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(coordinate, 12));
+        }
+    }
+
+    private void addMarkerForRoute(VehicleItem item, boolean isLast) {
+        LatLng coordinate = new LatLng(item.getLatitude(), item.getLongitude());
+
+        float color = item.getAcc() ? BitmapDescriptorFactory.HUE_GREEN :
+                BitmapDescriptorFactory.HUE_RED;
+        BitmapDescriptor icon = BitmapDescriptorFactory.defaultMarker(color);
+
+        String snippet = item.getTime() + " - " + item.getSpeed() + " km/h";
+
+        MarkerOptions markerOptions = new MarkerOptions()
+                .position(coordinate)
+                .title(item.getName())
+                .snippet(snippet)
+                .icon(icon);
+
+        mMap.addMarker(markerOptions);
+
+        if (isLast) {
+            int zoom = 10; //mItem == null ? 10 : 15;
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(coordinate, zoom));
         }
+
+
+    }
+
+    private void drawArrowHead(GoogleMap mMap, LatLng from, LatLng to){
+        // obtain the bearing between the last two points
+        double bearing = GetBearing(from, to);
+
+        // round it to a multiple of 3 and cast out 120s
+        double adjBearing = Math.round(bearing / 3) * 3;
+        while (adjBearing >= 120) {
+            adjBearing -= 120;
+        }
+
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+
+        // Get the corresponding triangle marker from Google
+        URL url;
+        Bitmap image = null;
+
+        try {
+            url = new URL("http://www.google.com/intl/en_ALL/mapfiles/dir_" + String.valueOf((int)adjBearing) + ".png");
+            try {
+                image = BitmapFactory.decodeStream(url.openConnection().getInputStream());
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        } catch (MalformedURLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        if (image != null){
+
+            // Anchor is ratio in range [0..1] so value of 0.5 on x and y will center the marker image on the lat/long
+            float anchorX = 0.5f;
+            float anchorY = 0.5f;
+
+            int offsetX = 0;
+            int offsetY = 0;
+
+            // images are 24px x 24px
+            // so transformed image will be 48px x 48px
+
+            //315 range -- 22.5 either side of 315
+            if (bearing >= 292.5 && bearing < 335.5){
+                offsetX = 24;
+                offsetY = 24;
+            }
+            //270 range
+            else if (bearing >= 247.5 && bearing < 292.5){
+                offsetX = 24;
+                offsetY = 12;
+            }
+            //225 range
+            else if (bearing >= 202.5 && bearing < 247.5){
+                offsetX = 24;
+                offsetY = 0;
+            }
+            //180 range
+            else if (bearing >= 157.5 && bearing < 202.5){
+                offsetX = 12;
+                offsetY = 0;
+            }
+            //135 range
+            else if (bearing >= 112.5 && bearing < 157.5){
+                offsetX = 0;
+                offsetY = 0;
+            }
+            //90 range
+            else if (bearing >= 67.5 && bearing < 112.5){
+                offsetX = 0;
+                offsetY = 12;
+            }
+            //45 range
+            else if (bearing >= 22.5 && bearing < 67.5){
+                offsetX = 0;
+                offsetY = 24;
+            }
+            //0 range - 335.5 - 22.5
+            else {
+                offsetX = 12;
+                offsetY = 24;
+            }
+
+            Bitmap wideBmp;
+            Canvas wideBmpCanvas;
+            Rect src, dest;
+
+            // Create larger bitmap 4 times the size of arrow head image
+            wideBmp = Bitmap.createBitmap(image.getWidth() * 2, image.getHeight() * 2, image.getConfig());
+
+            wideBmpCanvas = new Canvas(wideBmp);
+
+            src = new Rect(0, 0, image.getWidth(), image.getHeight());
+            dest = new Rect(src);
+            dest.offset(offsetX, offsetY);
+
+            wideBmpCanvas.drawBitmap(image, src, dest, null);
+
+            mMap.addMarker(new MarkerOptions()
+                    .position(to)
+                    .icon(BitmapDescriptorFactory.fromBitmap(wideBmp))
+                    .anchor(anchorX, anchorY));
+        }
+    }
+
+    private double GetBearing(LatLng from, LatLng to){
+        double lat1 = from.latitude * Math.PI / 180.0;
+        double lon1 = from.longitude * Math.PI / 180.0;
+        double lat2 = to.latitude * Math.PI / 180.0;
+        double lon2 = to.longitude * Math.PI / 180.0;
+
+        // Compute the angle.
+        double angle = - Math.atan2( Math.sin( lon1 - lon2 ) * Math.cos( lat2 ), Math.cos( lat1 ) * Math.sin( lat2 ) - Math.sin( lat1 ) * Math.cos( lat2 ) * Math.cos( lon1 - lon2 ) );
+
+        if (angle < 0.0)
+            angle += Math.PI * 2.0;
+
+        // And convert result to degrees.
+        double degreesPerRadian = 180.0 / Math.PI;
+        angle = angle * degreesPerRadian;
+
+        return angle;
     }
 
     public void setMapType(int mapType) {
@@ -130,7 +296,85 @@ public class GGMapFragment extends Fragment {
         mMap.clear();
     }
 
-    public void updateView() {
+    private void showRoute() {
+        Long deviceId = mItem.getId();
+        String date = android.text.format.DateFormat.format("yyyy-MM-d",
+                new java.util.Date()).toString();
+
+        String range = date + "%2000:00:00/" + date + "%2023:59:59";
+        RouteByDeviceRequest request = new RouteByDeviceRequest
+                (deviceId, range, new Response.Listener<JSONArray>() {
+
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        clear();
+                        PolylineOptions options = new PolylineOptions().width(5).color(Color.BLUE).geodesic(true);
+                        LatLng lastPoint = null;
+
+                        for (int i = 0; i < response.length(); ++i) {
+                            try {
+                                JSONObject data = response.getJSONObject(i);
+                                Long id = data.getLong("device_id");
+                                VehicleItem item = new VehicleItem(id, mItem.getName());
+
+                                Double latitude = data.getDouble("latitude");
+                                Double longitude = data.getDouble("longitude");
+                                item.setLatitude(latitude);
+                                item.setLongitude(longitude);
+
+                                String time = data.getString("time");
+                                item.setTime(time);
+
+                                if (data.has("other")) {
+                                    String extraInfo = data.getString("other").replace("\\/", "/");
+                                    item.setExtraInfo(extraInfo);
+                                }
+
+                                if (data.has("speed")) {
+                                    String speed = data.getString("speed");
+                                    item.setSpeed(speed);
+                                }
+
+                                if (mItem == null || mItem.getId().equals(item.getId())) {
+                                    addMarkerForRoute(item, i == response.length() - 1);
+
+                                    LatLng point = new LatLng(latitude, longitude);
+                                    options.add(point);
+
+                                    if (lastPoint != null) {
+                                        drawArrowHead(mMap, lastPoint, point);
+                                    }
+
+                                    lastPoint = point;
+                                }
+                            } catch (JSONException e) {
+                                Log.e(TAG, "Error while reading marker from response", e);
+                            }
+                        }
+
+                        mMap.addPolyline(options);
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        String message;
+                        try {
+                            String body = new String(error.networkResponse.data);
+                            JSONObject response = new JSONObject(body);
+                            message = response.getString("response");
+                        } catch (Exception e) {
+                            message = "Verifique sua conexão.";
+                        }
+                        if (isAdded()) {
+                            Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+
+        NetworkUtils.addToRequestQueue(request);
+    }
+
+    private void showPoint() {
         LastInfDeviceRequest request = new LastInfDeviceRequest
                 (new Response.Listener<JSONArray>() {
 
@@ -188,6 +432,15 @@ public class GGMapFragment extends Fragment {
                 });
 
         NetworkUtils.addToRequestQueue(request);
+    }
+
+    public void updateView() {
+        if (getArguments() != null && getArguments().getBoolean(SHOW_ROUTE_KEY, false)) {
+            ((MainActivity) getActivity()).setCustomTitle("Rota");
+            showRoute();
+        } else {
+            showPoint();
+        }
     }
 
     private boolean isDrawerOpen() {

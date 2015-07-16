@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F5F5F5"
@@ -17,20 +18,21 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:textStyle="bold"
             android:text="HXI-4677"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textColor="#333"
-            android:textSize="16sp"/>
+            android:textSize="18sp"/>
 
         <TextView
             android:id="@+id/tvVelocidade"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textStyle="bold"
             android:text="50 Km/h"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textColor="#333"
-            android:textSize="16sp"
-            android:layout_marginRight="40dp"/>
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/tvDistancia"
@@ -40,7 +42,9 @@
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textColor="#333"
             android:visibility="gone"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:layout_gravity="right"
+            android:layout_marginLeft="40dp"/>
 
     </LinearLayout>
 

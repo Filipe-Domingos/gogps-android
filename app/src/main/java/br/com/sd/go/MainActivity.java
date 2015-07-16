@@ -41,8 +41,9 @@ public class MainActivity extends ActionBarActivity implements ListView.OnItemCl
     private CharSequence titleFragment;
 
     public final static int CARS_POSITION = 1;
-    public final static int MAP_POSITION = 2;
-    public final static int TERMS_MENU_POSITION = 3;
+    public final static int TERMS_MENU_POSITION = 2;
+    public final static int ROUTE_POSITION = 3;
+    public final static int MAP_POSITION = 4;
 
     Handler updateTimeHandler = new Handler();
     Runnable runnableUpdateTime = new Runnable() {
@@ -56,9 +57,9 @@ public class MainActivity extends ActionBarActivity implements ListView.OnItemCl
 
     private List<ItemMenuDrawer> mItemsDrawer = new ArrayList<ItemMenuDrawer>() {{
         add(new ItemMenuDrawer("Meus Veículos", R.drawable.ic_my_cars));
-        add(new ItemMenuDrawer("Rastreamento", R.drawable.ic_device_gps_fixed));
         add(new ItemMenuDrawer("Termos de uso", R.drawable.ic_action_terms_of_use));
         add(new ItemMenuDrawer("Sair", R.drawable.ic_action_exit));
+        //        add(new ItemMenuDrawer("Rastreamento", R.drawable.ic_device_gps_fixed));
     }};
 
     private int mActualPosition = -1;
@@ -118,6 +119,9 @@ public class MainActivity extends ActionBarActivity implements ListView.OnItemCl
     protected void onDestroy() {
         super.onDestroy();
         updateTimeHandler.removeCallbacks(runnableUpdateTime);
+        if (isFinishing() && !GoGPS.getRemember()) {
+            GoGPS.setBasicAuth(null);
+        }
     }
 
     @Override
@@ -172,6 +176,22 @@ public class MainActivity extends ActionBarActivity implements ListView.OnItemCl
         selectedItem(MAP_POSITION, item);
     }
 
+    public void showCarRoute(VehicleItem item) {
+        Fragment frag = new GGMapFragment();
+        if (item != null) {
+            Bundle args = new Bundle();
+            args.putSerializable(GGMapFragment.ITEM_KEY, item);
+            args.putBoolean(GGMapFragment.SHOW_ROUTE_KEY, true);
+            frag.setArguments(args);
+        }
+
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.replace(R.id.frame_layout, frag);
+        ft.commit();
+
+        mActualPosition = ROUTE_POSITION;
+    }
+
     public void openMapFragment() {
         selectedItem(MAP_POSITION);
     }
@@ -200,20 +220,20 @@ public class MainActivity extends ActionBarActivity implements ListView.OnItemCl
                 frag = new ListCarsFragment();
                 break;
             case 1:
+                frag = new TermsFragment();
+                break;
+            case 2:
+                GoGPS.setBasicAuth(null);
+                startActivity(new Intent(getBaseContext(), LoginActivity.class));
+                finish();
+                break;
+            case 3:
                 frag = new GGMapFragment();
                 if (item != null) {
                     Bundle args = new Bundle();
                     args.putSerializable(GGMapFragment.ITEM_KEY, item);
                     frag.setArguments(args);
                 }
-                break;
-            case 2:
-                frag = new TermsFragment();
-                break;
-            case 3:
-                GoGPS.setBasicAuth(null);
-                startActivity(new Intent(getBaseContext(), LoginActivity.class));
-                finish();
                 break;
             default:
                 break;
@@ -226,7 +246,13 @@ public class MainActivity extends ActionBarActivity implements ListView.OnItemCl
         }
 
         listView.setItemChecked(position, true);
-        setCustomTitle(mItemsDrawer.get(position).getTitle());
+        String title = "Go! GPS";
+        if (mItemsDrawer.size() > position) {
+            title = mItemsDrawer.get(position).getTitle();
+        } else if (item != null) {
+            title = item.getName();
+        }
+        setCustomTitle(title);
         drawerLayout.closeDrawer(listView);
 
         mActualPosition = position;
@@ -236,7 +262,7 @@ public class MainActivity extends ActionBarActivity implements ListView.OnItemCl
         selectedItem(position, null);
     }
 
-    private void setCustomTitle(String title) {
+    public void setCustomTitle(String title) {
         actionBar.setTitle(title);
         titleFragment = title;
     }

@@ -29,7 +29,7 @@ public class CommandRequests {
     private int command = CommandAPIRequest.BLOCK_COMMAND;
     private Long deviceId;
 
-    CommandRequests(MainActivity activity, Long deviceId, int command) {
+    public CommandRequests(MainActivity activity, Long deviceId, int command) {
         this.activity = activity;
         this.deviceId = deviceId;
         this.command = command;
