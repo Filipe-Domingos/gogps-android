@@ -40,6 +40,8 @@ public class MainActivity extends ActionBarActivity implements ListView.OnItemCl
     private CharSequence titleDrawer;
     private CharSequence titleFragment;
 
+    private TextView hour;
+
     public final static int CARS_POSITION = 1;
     public final static int TERMS_MENU_POSITION = 2;
     public final static int ROUTE_POSITION = 3;
@@ -48,12 +50,10 @@ public class MainActivity extends ActionBarActivity implements ListView.OnItemCl
     Handler updateTimeHandler = new Handler();
     Runnable runnableUpdateTime = new Runnable() {
         public void run() {
-            supportInvalidateOptionsMenu();
+            updateHour();
             updateTimeHandler.postDelayed(this, 3000);
         }
     };
-
-    TextView timeViewBar;
 
     private List<ItemMenuDrawer> mItemsDrawer = new ArrayList<ItemMenuDrawer>() {{
         add(new ItemMenuDrawer("Meus Veículos", R.drawable.ic_my_cars));
@@ -63,6 +63,16 @@ public class MainActivity extends ActionBarActivity implements ListView.OnItemCl
     }};
 
     private int mActualPosition = -1;
+
+    private void updateHour() {
+        if (hour != null) {
+            String text = android.text.format.DateFormat.format("d/MM hh:mm  ",
+                    new java.util.Date()).toString();
+
+            hour.setText(text);
+            updateTimeHandler.postDelayed(runnableUpdateTime, 1000);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +84,8 @@ public class MainActivity extends ActionBarActivity implements ListView.OnItemCl
         actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeButtonEnabled(true);
+
+        hour = (TextView) findViewById(R.id.hour);
 
         DrawerListAdapter drawerAdapter = new DrawerListAdapter(this, mItemsDrawer);
 
@@ -122,26 +134,6 @@ public class MainActivity extends ActionBarActivity implements ListView.OnItemCl
         if (isFinishing() && !GoGPS.getRemember()) {
             GoGPS.setBasicAuth(null);
         }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            String text = android.text.format.DateFormat.format("d/MM hh:mm  ",
-                    new java.util.Date()).toString();
-
-            timeViewBar = new TextView(this);
-            timeViewBar.setText(text);
-            timeViewBar.setTextColor(getResources().getColor(R.color.white));
-            timeViewBar.setOnClickListener(null);
-            timeViewBar.setPadding(5, 5, 5, 5);
-            timeViewBar.setTextSize(16);
-            menu.add(0, R.string.app_name, 1, R.string.app_name)
-                    .setActionView(timeViewBar)
-                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-            updateTimeHandler.postDelayed(runnableUpdateTime, 1000);
-        }
-        return super.onCreateOptionsMenu(menu);
     }
 
     @Override

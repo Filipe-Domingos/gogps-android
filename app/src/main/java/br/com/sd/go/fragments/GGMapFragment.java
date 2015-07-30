@@ -1,5 +1,6 @@
 package br.com.sd.go.fragments;
 
+import android.app.ProgressDialog;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -58,6 +59,8 @@ public class GGMapFragment extends Fragment {
     private LinearLayout mBottomMenu;
     private VehicleItem mItem;
 
+    private ProgressDialog mProgressDialog;
+
     public static final String ITEM_KEY = "item";
     public static final String SHOW_ROUTE_KEY = "show_route";
 
@@ -77,8 +80,11 @@ public class GGMapFragment extends Fragment {
         }
 
         mMap = ((SupportMapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
+        mMap.setMyLocationEnabled(true);
+        mMap.getUiSettings().setZoomControlsEnabled(true);
+        mMap.getUiSettings().setCompassEnabled(true);
 
-        setHasOptionsMenu(false);
+        setHasOptionsMenu(true);
 
         mBottomMenu = ((LinearLayout) view.findViewById(R.id.bottom_menu));
         mBottomMenu.removeAllViews();
@@ -160,7 +166,6 @@ public class GGMapFragment extends Fragment {
             int zoom = 10; //mItem == null ? 10 : 15;
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(coordinate, zoom));
         }
-
 
     }
 
@@ -297,6 +302,8 @@ public class GGMapFragment extends Fragment {
     }
 
     private void showRoute() {
+        mProgressDialog = ProgressDialog.show(getActivity(), "Aguarde", "Carregando rota...");
+
         Long deviceId = mItem.getId();
         String date = android.text.format.DateFormat.format("yyyy-MM-d",
                 new java.util.Date()).toString();
@@ -353,10 +360,17 @@ public class GGMapFragment extends Fragment {
                         }
 
                         mMap.addPolyline(options);
+
+                        if (mProgressDialog != null && mProgressDialog.isShowing()) {
+                            mProgressDialog.cancel();
+                        }
                     }
                 }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
+                        if (mProgressDialog != null && mProgressDialog.isShowing()) {
+                            mProgressDialog.cancel();
+                        }
                         String message;
                         try {
                             String body = new String(error.networkResponse.data);

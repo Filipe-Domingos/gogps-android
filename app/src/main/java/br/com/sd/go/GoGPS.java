@@ -8,6 +8,8 @@ import android.os.Build;
 import android.util.Log;
 
 import br.com.sd.go.utils.GoGPSConstants;
+import com.crashlytics.android.Crashlytics;
+import io.fabric.sdk.android.Fabric;
 
 public class GoGPS extends Application {
 
@@ -21,6 +23,7 @@ public class GoGPS extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        Fabric.with(this, new Crashlytics());
         mContext = getApplicationContext();
 
         Log.i(TAG, "GoGPS app startup");

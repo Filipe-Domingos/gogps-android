@@ -1,25 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.DrawerLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/dl"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <FrameLayout
-        android:id="@+id/frame_layout"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/holo_blue_dark"
+            android:orientation="horizontal"
+            android:padding="8dp">
+
+            <TextView
+                android:id="@+id/hour"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:textSize="14sp"
+                android:textColor="@color/white"
+                android:text="30/07 08:02"/>
+
+        </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/frame_layout"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+    </LinearLayout>
 
     <ListView
         android:id="@+id/lv_navigator"
         android:layout_width="250dp"
         android:layout_height="match_parent"
-        android:background="#F5F5F5"
         android:layout_gravity="start"
+        android:background="#F5F5F5"
+        android:choiceMode="singleChoice"
         android:divider="#DEDEDE"
         android:dividerHeight="1dp"
-        android:choiceMode="singleChoice"
-        android:headerDividersEnabled="true"
-        />
+        android:headerDividersEnabled="true" />
 
 </android.support.v4.widget.DrawerLayout>

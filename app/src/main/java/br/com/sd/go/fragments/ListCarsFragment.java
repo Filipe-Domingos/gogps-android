@@ -59,24 +59,19 @@ public class ListCarsFragment extends Fragment {
 
             @Override
             public void create(SwipeMenu menu) {
-                switch (menu.getViewType()) {
-                    case 1:
-                        SwipeMenuItem blockItem = new SwipeMenuItem(getActivity());
-                        blockItem.setBackground(new ColorDrawable(Color.rgb(0xFD, 0xFD, 0xFD)));
-                        blockItem.setWidth(dp2px(60));
-                        blockItem.setIcon(R.drawable.ic_action_lock_outline);
+                SwipeMenuItem blockItem = new SwipeMenuItem(getActivity());
+                blockItem.setBackground(new ColorDrawable(Color.rgb(0xFD, 0xFD, 0xFD)));
+                blockItem.setWidth(dp2px(60));
+                blockItem.setIcon(R.drawable.ic_action_lock_outline);
 
-                        menu.addMenuItem(blockItem);
-                        break;
-                    default:
-                        SwipeMenuItem unlockItem = new SwipeMenuItem(getActivity());
-                        unlockItem.setBackground(new ColorDrawable(Color.rgb(0xFD, 0xFD, 0xFD)));
-                        unlockItem.setWidth(dp2px(60));
-                        unlockItem.setIcon(R.drawable.ic_action_lock_open);
+                menu.addMenuItem(blockItem);
 
-                        menu.addMenuItem(unlockItem);
-                        break;
-                }
+                SwipeMenuItem unlockItem = new SwipeMenuItem(getActivity());
+                unlockItem.setBackground(new ColorDrawable(Color.rgb(0xFD, 0xFD, 0xFD)));
+                unlockItem.setWidth(dp2px(60));
+                unlockItem.setIcon(R.drawable.ic_action_lock_open);
+
+                menu.addMenuItem(unlockItem);
 
                 SwipeMenuItem actualPositionItem = new SwipeMenuItem(getActivity());
                 actualPositionItem.setBackground(new ColorDrawable(Color.rgb(0xFD, 0xFD, 0xFD)));
@@ -101,26 +96,21 @@ public class ListCarsFragment extends Fragment {
             @Override
             public boolean onMenuItemClick(int position, SwipeMenu menu, int index) {
                 VehicleItem item = mItems.get(position);
+                MainActivity activity = (MainActivity) getActivity();
+                Integer commandCode;
                 switch (index) {
                     case 0:
-                        Integer commandCode;
-                        switch (menu.getViewType()) {
-                            case 1:
-                                // Mandar bloquear
-                                commandCode = CommandAPIRequest.BLOCK_COMMAND;
-                                break;
-                            default:
-                                // Mandar desbloquear
-                                commandCode = CommandAPIRequest.UNLOCK_COMMAND;
-                                break;
-                        }
-                        MainActivity activity = (MainActivity) getActivity();
+                        commandCode = CommandAPIRequest.BLOCK_COMMAND;
                         new CommandRequests(activity, item.getId(), commandCode).sendCommand();
                         break;
                     case 1:
-                        ((MainActivity) getActivity()).showCarInMap(item);
+                        commandCode = CommandAPIRequest.UNLOCK_COMMAND;
+                        new CommandRequests(activity, item.getId(), commandCode).sendCommand();
                         break;
                     case 2:
+                        ((MainActivity) getActivity()).showCarInMap(item);
+                        break;
+                    case 3:
                         ((MainActivity) getActivity()).showCarRoute(item);
                 }
                 return false;
