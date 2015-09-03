@@ -1,5 +1,6 @@
 package br.com.sd.go.fragments;
 
+import android.app.ProgressDialog;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -46,6 +47,7 @@ public class ListCarsFragment extends Fragment {
     private List<VehicleItem> mItems;
     private SwipeMenuListView mListView;
     private LinearLayout mBottomMenu;
+    private ProgressDialog progressDialog;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -80,12 +82,13 @@ public class ListCarsFragment extends Fragment {
 
                 menu.addMenuItem(actualPositionItem);
 
-                SwipeMenuItem routesItem = new SwipeMenuItem(getActivity());
-                routesItem.setBackground(new ColorDrawable(Color.rgb(0xFD, 0xFD, 0xFD)));
-                routesItem.setWidth(dp2px(60));
-                routesItem.setIcon(R.drawable.ic_maps_map);
-
-                menu.addMenuItem(routesItem);
+//                TODO: opção de rotas
+//                SwipeMenuItem routesItem = new SwipeMenuItem(getActivity());
+//                routesItem.setBackground(new ColorDrawable(Color.rgb(0xFD, 0xFD, 0xFD)));
+//                routesItem.setWidth(dp2px(60));
+//                routesItem.setIcon(R.drawable.ic_maps_map);
+//
+//                menu.addMenuItem(routesItem);
             }
 
         };
@@ -158,6 +161,9 @@ public class ListCarsFragment extends Fragment {
     }
 
     private void loadData() {
+        progressDialog = ProgressDialog.show(getActivity(), getString(R.string.loading), null,
+                true, false);
+
         DevicesUserRequest request = new DevicesUserRequest
                 (new Response.Listener<JSONArray>() {
 
@@ -187,6 +193,11 @@ public class ListCarsFragment extends Fragment {
                                     item.setSpeed(speed);
                                 }
 
+                                if (data.has("time")) {
+                                    String time = data.getString("time");
+                                    item.setTime(time);
+                                }
+
                                 mItems.add(item);
                             } catch (JSONException e) {
                                 Log.e(TAG, "Error while reading marker from response", e);
@@ -196,15 +207,23 @@ public class ListCarsFragment extends Fragment {
                         Collections.sort(mItems);
 
                         mListView.setAdapter(new ListCarsAdapter(getActivity(), mItems));
+                        closeDialog();
                     }
                 }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
+                        closeDialog();
                         Toast.makeText(getActivity(), "Verifique sua conexão.",
                                 Toast.LENGTH_SHORT).show();
                     }
                 });
 
         NetworkUtils.addToRequestQueue(request);
+    }
+
+    private void closeDialog() {
+        if (progressDialog != null && progressDialog.isShowing()) {
+            progressDialog.cancel();
+        }
     }
 }

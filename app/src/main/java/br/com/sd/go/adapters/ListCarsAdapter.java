@@ -57,6 +57,7 @@ public class ListCarsAdapter extends ArrayAdapter<VehicleItem> {
             viewHolder.tvVelocidade = (TextView) convertView.findViewById(R.id.tvVelocidade);
             viewHolder.tvDistancia = (TextView) convertView.findViewById(R.id.tvDistancia);
             viewHolder.tvAddress = (TextView) convertView.findViewById(R.id.tvAddress);
+            viewHolder.tvTime = (TextView) convertView.findViewById(R.id.tvTime);
             convertView.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
@@ -71,6 +72,8 @@ public class ListCarsAdapter extends ArrayAdapter<VehicleItem> {
             viewHolder.tvVelocidade.setVisibility(View.VISIBLE);
             viewHolder.tvVelocidade.setText(item.getSpeed() + " Km/h");
         }
+
+        viewHolder.tvTime.setText(item.getTime());
 
         viewHolder.tvAddress.setText("Carregando endereço...");
 
@@ -118,5 +121,6 @@ public class ListCarsAdapter extends ArrayAdapter<VehicleItem> {
         TextView tvVelocidade;
         TextView tvDistancia;
         TextView tvAddress;
+        TextView tvTime;
     }
 }
