@@ -21,6 +21,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -39,6 +40,8 @@ import br.com.sd.go.swipemenu.SwipeMenuListView;
 import br.com.sd.go.utils.CommandRequests;
 import br.com.sd.go.utils.NetworkUtils;
 import br.com.sd.go.utils.QuickReturnUtil;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class ListCarsFragment extends Fragment {
 
@@ -194,8 +197,12 @@ public class ListCarsFragment extends Fragment {
                                 }
 
                                 if (data.has("time")) {
-                                    String time = data.getString("time");
-                                    item.setTime(time);
+                                    try {
+                                        String reformattedStr = new SimpleDateFormat("dd/MM/yyyy HH:mm").format(new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(data.getString("time")));
+                                        item.setTime(reformattedStr);
+                                    } catch (ParseException e) {
+                                        e.printStackTrace();
+                                    }
                                 }
 
                                 mItems.add(item);

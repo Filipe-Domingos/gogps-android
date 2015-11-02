@@ -20,6 +20,8 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,6 +43,7 @@ public class MainActivity extends ActionBarActivity implements ListView.OnItemCl
     private CharSequence titleFragment;
 
     private TextView hour;
+    private TextView hourPoint;
 
     public final static int CARS_POSITION = 1;
     public final static int TERMS_MENU_POSITION = 2;
@@ -86,6 +89,11 @@ public class MainActivity extends ActionBarActivity implements ListView.OnItemCl
         actionBar.setHomeButtonEnabled(true);
 
         hour = (TextView) findViewById(R.id.hour);
+        hourPoint = (TextView) findViewById(R.id.tvTime);
+
+        SimpleDateFormat format = new SimpleDateFormat( "dd/MM/yyyy HH:MM" );
+        long date = System.currentTimeMillis();
+        hour.setText(format.format(date));
 
         DrawerListAdapter drawerAdapter = new DrawerListAdapter(this, mItemsDrawer);
 
