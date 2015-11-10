@@ -108,8 +108,7 @@ public class MainActivity extends ActionBarActivity implements ListView.OnItemCl
 
         drawerLayout = (DrawerLayout) findViewById(R.id.dl);
 
-        barTg = new ActionBarDrawerToggle(this, drawerLayout,
-                R.drawable.toggle_img, R.drawable.toggle_img) {
+        barTg = new ActionBarDrawerToggle(this, drawerLayout, R.string.app_name, R.string.app_name) {
             @Override
             public void onDrawerClosed(View drawerView) {
                 super.onDrawerClosed(drawerView);
